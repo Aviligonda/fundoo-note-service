@@ -236,4 +236,90 @@ public class NoteService implements INoteService {
         }
         throw new UserException(400, "No Note found  with this id");
     }
+
+    /*
+     * Purpose : Implement the Logic of UnPin note Details
+     * @author : Aviligonda Sreenivasulu
+     * @Param :  id
+     * */
+    @Override
+    public Response unPinNote(Long id) {
+        Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
+        if (isNotePresent.isPresent()) {
+            if (!isNotePresent.get().isTrash()) {
+                isNotePresent.get().setPin(false);
+                noteServiceRepository.save(isNotePresent.get());
+                return new Response(200, "Success", isNotePresent.get());
+            } else {
+                throw new UserException(400, " Note found in trash, Not possible to UnPin");
+            }
+        }
+        throw new UserException(400, "No Note found  with this id");
+    }
+
+    /*
+     * Purpose : Implement the Logic of UnArchive note Details
+     * @author : Aviligonda Sreenivasulu
+     * @Param :  id
+     * */
+    @Override
+    public Response unArchiveNote(Long id) {
+        Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
+        if (isNotePresent.isPresent()) {
+            if (!isNotePresent.get().isTrash()) {
+                isNotePresent.get().setArchive(false);
+                noteServiceRepository.save(isNotePresent.get());
+                return new Response(200, "Success", isNotePresent.get());
+            } else {
+                throw new UserException(400, " Note found in trash, Not possible to archive");
+            }
+        }
+        throw new UserException(400, "No Note found  with this id");
+    }
+
+    /*
+     * Purpose : Implement the Logic of Get All Note Details in Trash
+     * @author : Aviligonda Sreenivasulu
+     * @Param :
+     * */
+    @Override
+    public List<NoteServiceModel> getAllNotesInTrash() {
+        List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByTrash();
+        if (isNotePresent.size() > 0) {
+            return isNotePresent;
+        } else {
+            throw new UserException(400, "No notes Found in Trash");
+        }
+    }
+
+    /*
+     * Purpose : Implement the Logic of Get All Note Details in Pin
+     * @author : Aviligonda Sreenivasulu
+     * @Param :
+     * */
+    @Override
+    public List<NoteServiceModel> getAllNotesInPin() {
+        List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByPin();
+        if (isNotePresent.size() > 0) {
+            return isNotePresent;
+        } else {
+            throw new UserException(400, "No notes Found in Pin");
+        }
+    }
+
+    /*
+     * Purpose : Implement the Logic of Get All Note Details in Archive
+     * @author : Aviligonda Sreenivasulu
+     * @Param :
+     * */
+    @Override
+    public List<NoteServiceModel> getAllNotesInArchive() {
+        List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByArchive();
+        if (isNotePresent.size() > 0) {
+            return isNotePresent;
+        } else {
+            throw new UserException(400, "No notes Found in Archive");
+        }
+    }
+
 }

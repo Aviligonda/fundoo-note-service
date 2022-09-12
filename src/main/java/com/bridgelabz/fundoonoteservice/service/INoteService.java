@@ -34,4 +34,13 @@ public interface INoteService {
 
     Response setRemainder(Long id, LocalDateTime localDateTime);
 
+    Response unPinNote(Long id);
+
+    Response unArchiveNote(Long id);
+
+    List<NoteServiceModel> getAllNotesInTrash();
+
+    List<NoteServiceModel> getAllNotesInPin();
+
+    List<NoteServiceModel> getAllNotesInArchive();
 }
