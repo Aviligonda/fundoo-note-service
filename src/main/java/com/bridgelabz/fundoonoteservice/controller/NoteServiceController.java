@@ -31,8 +31,9 @@ public class NoteServiceController {
      * */
     @PostMapping("/createNote")
     public ResponseEntity<Response> createNote(@Valid @RequestBody NoteServiceDTO noteServiceDTO,
-                                               @RequestParam List<String> collaborator) {
-        Response response = noteService.createNote(noteServiceDTO,collaborator);
+                                               @RequestParam List<String> collaborator,
+                                               @RequestHeader String token) {
+        Response response = noteService.createNote(noteServiceDTO,collaborator,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -44,8 +45,9 @@ public class NoteServiceController {
     @PutMapping("/updateNote/{id}")
     public ResponseEntity<Response> updateNote(@PathVariable Long id,
                                                @Valid @RequestBody NoteServiceDTO noteServiceDTO,
-                                               @RequestParam List<String> collaborator) {
-        Response response = noteService.updateNote(id, noteServiceDTO,collaborator);
+                                               @RequestParam List<String> collaborator,
+                                               @RequestHeader String token) {
+        Response response = noteService.updateNote(id, noteServiceDTO,collaborator,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -55,8 +57,8 @@ public class NoteServiceController {
      * @Param :
      * */
     @GetMapping("/getAllNote")
-    public ResponseEntity<List<?>> getAllNote() {
-        List<NoteServiceModel> response = noteService.getAllNote();
+    public ResponseEntity<List<?>> getAllNote(@RequestHeader String token) {
+        List<NoteServiceModel> response = noteService.getAllNote(token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -66,8 +68,9 @@ public class NoteServiceController {
      * @Param : id
      * */
     @GetMapping("/getNoteById/{id}")
-    public ResponseEntity<Response> getNoteById(@PathVariable Long id) {
-        Response response = noteService.getNoteById(id);
+    public ResponseEntity<Response> getNoteById(@PathVariable Long id,
+                                                @RequestHeader String token) {
+        Response response = noteService.getNoteById(id,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -77,8 +80,9 @@ public class NoteServiceController {
      * @Param : id
      * */
     @DeleteMapping("/permanentDelete/{id}")
-    public ResponseEntity<Response> permanentDelete(@PathVariable Long id) {
-        Response response = noteService.permanentDelete(id);
+    public ResponseEntity<Response> permanentDelete(@PathVariable Long id,
+                                                    @RequestHeader String token) {
+        Response response = noteService.permanentDelete(id,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -88,8 +92,9 @@ public class NoteServiceController {
      * @Param : id
      * */
     @DeleteMapping("/trashNote/{id}")
-    public ResponseEntity<Response> trashNote(@PathVariable Long id) {
-        Response response = noteService.trashNote(id);
+    public ResponseEntity<Response> trashNote(@PathVariable Long id,
+                                              @RequestHeader String token) {
+        Response response = noteService.trashNote(id,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -99,8 +104,9 @@ public class NoteServiceController {
      * @Param : id
      * */
     @PutMapping("/restoreNote/{id}")
-    public ResponseEntity<Response> restoreNote(@PathVariable Long id) {
-        Response response = noteService.restoreNote(id);
+    public ResponseEntity<Response> restoreNote(@PathVariable Long id,
+                                                @RequestHeader String token) {
+        Response response = noteService.restoreNote(id,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -110,8 +116,9 @@ public class NoteServiceController {
      * @Param : id
      * */
     @PutMapping("/archiveNote/{id}")
-    public ResponseEntity<Response> archiveNote(@PathVariable Long id) {
-        Response response = noteService.archiveNote(id);
+    public ResponseEntity<Response> archiveNote(@PathVariable Long id,
+                                                @RequestHeader String token) {
+        Response response = noteService.archiveNote(id,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -121,8 +128,9 @@ public class NoteServiceController {
      * @Param : id
      * */
     @PutMapping("/pinNote/{id}")
-    public ResponseEntity<Response> pinNote(@PathVariable Long id) {
-        Response response = noteService.pinNote(id);
+    public ResponseEntity<Response> pinNote(@PathVariable Long id,
+                                            @RequestHeader String token) {
+        Response response = noteService.pinNote(id,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -133,8 +141,9 @@ public class NoteServiceController {
      * */
     @PutMapping("/changeColourNote/{id}")
     public ResponseEntity<Response> changeColourNote(@PathVariable Long id,
-                                                     @RequestParam String colour) {
-        Response response = noteService.changeColourNote(id, colour);
+                                                     @RequestParam String colour,
+                                                     @RequestHeader String token) {
+        Response response = noteService.changeColourNote(id, colour,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -145,8 +154,9 @@ public class NoteServiceController {
      * */
     @PostMapping("/setRemainder/{id}")
     public ResponseEntity<Response> setRemainder(@PathVariable Long id,
-                                                 @RequestParam String remainder) {
-        Response response = noteService.setRemainder(id, remainder);
+                                                 @RequestParam String remainder,
+                                                 @RequestHeader String token) {
+        Response response = noteService.setRemainder(id, remainder,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     /*
@@ -155,8 +165,9 @@ public class NoteServiceController {
      * @Param : id
      * */
     @PutMapping("/unArchiveNote/{id}")
-    public ResponseEntity<Response> unArchiveNote(@PathVariable Long id) {
-        Response response = noteService.unArchiveNote(id);
+    public ResponseEntity<Response> unArchiveNote(@PathVariable Long id,
+                                                  @RequestHeader String token) {
+        Response response = noteService.unArchiveNote(id,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -166,8 +177,9 @@ public class NoteServiceController {
      * @Param : id
      * */
     @PutMapping("/unPinNote/{id}")
-    public ResponseEntity<Response> unPinNote(@PathVariable Long id) {
-        Response response = noteService.unPinNote(id);
+    public ResponseEntity<Response> unPinNote(@PathVariable Long id,
+                                              @RequestHeader String token) {
+        Response response = noteService.unPinNote(id,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     /*
@@ -176,8 +188,8 @@ public class NoteServiceController {
      * @Param :
      * */
     @GetMapping("/getAllNotesInTrash")
-    public ResponseEntity<List<?>> getAllNotesInTrash() {
-        List<NoteServiceModel> response = noteService.getAllNotesInTrash();
+    public ResponseEntity<List<?>> getAllNotesInTrash(@RequestHeader String token) {
+        List<NoteServiceModel> response = noteService.getAllNotesInTrash(token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     /*
@@ -186,8 +198,8 @@ public class NoteServiceController {
      * @Param :
      * */
     @GetMapping("/getAllNotesInPin")
-    public ResponseEntity<List<?>> getAllNotesInPin() {
-        List<NoteServiceModel> response = noteService.getAllNotesInPin();
+    public ResponseEntity<List<?>> getAllNotesInPin(@RequestHeader String token) {
+        List<NoteServiceModel> response = noteService.getAllNotesInPin(token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     /*
@@ -196,8 +208,8 @@ public class NoteServiceController {
      * @Param :
      * */
     @GetMapping("/getAllNotesInArchive")
-    public ResponseEntity<List<?>> getAllNotesInArchive() {
-        List<NoteServiceModel> response = noteService.getAllNotesInArchive();
+    public ResponseEntity<List<?>> getAllNotesInArchive(@RequestHeader String token) {
+        List<NoteServiceModel> response = noteService.getAllNotesInArchive(token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

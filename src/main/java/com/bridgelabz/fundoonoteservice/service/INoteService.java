@@ -11,35 +11,35 @@ import java.util.List;
  * @author : Aviligonda Sreenivasulu
  * */
 public interface INoteService {
-    Response createNote(NoteServiceDTO noteServiceDTO, List<String> collaborator);
+    Response createNote(NoteServiceDTO noteServiceDTO, List<String> collaborator, String token);
 
-    Response updateNote(Long id, NoteServiceDTO noteServiceDTO, List<String> collaborator);
+    Response updateNote(Long id, NoteServiceDTO noteServiceDTO, List<String> collaborator, String token);
 
-    List<NoteServiceModel> getAllNote();
+    List<NoteServiceModel> getAllNote(String token);
 
-    Response getNoteById(Long id);
+    Response getNoteById(Long id, String token);
 
-    Response permanentDelete(Long id);
+    Response permanentDelete(Long id, String token);
 
-    Response trashNote(Long id);
+    Response trashNote(Long id, String token);
 
-    Response restoreNote(Long id);
+    Response restoreNote(Long id, String token);
 
-    Response archiveNote(Long id);
+    Response archiveNote(Long id, String token);
 
-    Response pinNote(Long id);
+    Response pinNote(Long id, String token);
 
-    Response changeColourNote(Long id, String colour);
+    Response changeColourNote(Long id, String colour, String token);
 
-    Response setRemainder(Long id, String remainder);
+    Response setRemainder(Long id, String remainder, String token);
 
-    Response unPinNote(Long id);
+    Response unPinNote(Long id, String token);
 
-    Response unArchiveNote(Long id);
+    Response unArchiveNote(Long id, String token);
 
-    List<NoteServiceModel> getAllNotesInTrash();
+    List<NoteServiceModel> getAllNotesInTrash(String token);
 
-    List<NoteServiceModel> getAllNotesInPin();
+    List<NoteServiceModel> getAllNotesInPin(String token);
 
-    List<NoteServiceModel> getAllNotesInArchive();
+    List<NoteServiceModel> getAllNotesInArchive(String token);
 }
