@@ -30,13 +30,14 @@ public class NoteService implements INoteService {
      * @Param :  noteServiceDTO
      * */
     @Override
-    public Response createNote(NoteServiceDTO noteServiceDTO) {
+    public Response createNote(NoteServiceDTO noteServiceDTO, List<String> collaborator) {
         NoteServiceModel noteServiceModel = new NoteServiceModel(noteServiceDTO);
         noteServiceModel.setRegisterDate(LocalDateTime.now());
         noteServiceModel.setTrash(false);
         noteServiceModel.setPin(false);
         noteServiceModel.setArchive(false);
         noteServiceModel.setColor("White");
+        noteServiceModel.setCollaborator(collaborator);
         noteServiceRepository.save(noteServiceModel);
         String body = "Note Added Successfully with id is :" + noteServiceModel.getId();
         String subject = "Note Registration Successfully";
@@ -50,13 +51,13 @@ public class NoteService implements INoteService {
      * @Param :  id,noteServiceDTO
      * */
     @Override
-    public Response updateNote(Long id, NoteServiceDTO noteServiceDTO) {
+    public Response updateNote(Long id, NoteServiceDTO noteServiceDTO, List<String> collaborator) {
         Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
         if (isNotePresent.isPresent()) {
             isNotePresent.get().setTitle(noteServiceDTO.getTitle());
             isNotePresent.get().setDescription(noteServiceDTO.getDescription());
             isNotePresent.get().setEmailId(noteServiceDTO.getEmailId());
-            isNotePresent.get().setCollaborator(noteServiceDTO.getCollaborator());
+            isNotePresent.get().setCollaborator(collaborator);
             isNotePresent.get().setUpdateDate(LocalDateTime.now());
             noteServiceRepository.save(isNotePresent.get());
             String body = "Note Updated Successfully with id is :" + isNotePresent.get().getId();

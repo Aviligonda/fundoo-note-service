@@ -11,9 +11,9 @@ import java.util.List;
  * @author : Aviligonda Sreenivasulu
  * */
 public interface INoteService {
-    Response createNote(NoteServiceDTO noteServiceDTO);
+    Response createNote(NoteServiceDTO noteServiceDTO, List<String> collaborator);
 
-    Response updateNote(Long id, NoteServiceDTO noteServiceDTO);
+    Response updateNote(Long id, NoteServiceDTO noteServiceDTO, List<String> collaborator);
 
     List<NoteServiceModel> getAllNote();
 

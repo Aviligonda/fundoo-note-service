@@ -10,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /*
@@ -32,8 +30,9 @@ public class NoteServiceController {
      * @Param : noteServiceDTO
      * */
     @PostMapping("/createNote")
-    public ResponseEntity<Response> createNote(@Valid @RequestBody NoteServiceDTO noteServiceDTO) {
-        Response response = noteService.createNote(noteServiceDTO);
+    public ResponseEntity<Response> createNote(@Valid @RequestBody NoteServiceDTO noteServiceDTO,
+                                               @RequestParam List<String> collaborator) {
+        Response response = noteService.createNote(noteServiceDTO,collaborator);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -44,8 +43,9 @@ public class NoteServiceController {
      * */
     @PutMapping("/updateNote/{id}")
     public ResponseEntity<Response> updateNote(@PathVariable Long id,
-                                               @Valid @RequestBody NoteServiceDTO noteServiceDTO) {
-        Response response = noteService.updateNote(id, noteServiceDTO);
+                                               @Valid @RequestBody NoteServiceDTO noteServiceDTO,
+                                               @RequestParam List<String> collaborator) {
+        Response response = noteService.updateNote(id, noteServiceDTO,collaborator);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
