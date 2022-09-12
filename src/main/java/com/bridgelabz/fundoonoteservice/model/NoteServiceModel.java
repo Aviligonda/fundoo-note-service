@@ -6,6 +6,7 @@ import lombok.Data;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 /*
  * Purpose : NoteServiceModel Are Used Create A table and connection to Database
@@ -33,6 +34,15 @@ public class NoteServiceModel {
     private List<String> collaborator;
     private LocalDateTime registerDate;
     private LocalDateTime updateDate;
+
+//    @ManyToMany
+//    @JoinTable(name = "note_service_labellist",
+//            joinColumns = @JoinColumn(name = "note_service_model_id", referencedColumnName = "labellist_id"))
+//    private List<LabelModel> labelList = new ArrayList<>();
+    @ManyToMany(cascade = CascadeType.ALL)
+    private List<LabelModel> labelList;
+
+
 
     public NoteServiceModel(NoteServiceDTO noteServiceDTO) {
         this.title = noteServiceDTO.getTitle();
