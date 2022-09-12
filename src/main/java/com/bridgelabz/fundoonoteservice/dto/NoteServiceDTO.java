@@ -19,7 +19,5 @@ public class NoteServiceDTO {
     private String description;
     @Pattern(regexp = "(\\w+[.+-]?)*@\\w+(\\.+[a-zA-Z]{2,4})*", message = "Invalid Email, Enter correct Email")
     private String emailId;
-    @NotNull(message = " collaborator can't be Empty")
-    private List<String> collaborator;
 
 }
