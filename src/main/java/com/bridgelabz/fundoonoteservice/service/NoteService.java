@@ -223,11 +223,11 @@ public class NoteService implements INoteService {
      * @Param :  id,localDateTime
      * */
     @Override
-    public Response setRemainder(Long id, LocalDateTime localDateTime) {
+    public Response setRemainder(Long id, String remainder) {
         Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
         if (isNotePresent.isPresent()) {
             if (!isNotePresent.get().isTrash()) {
-                isNotePresent.get().setReminderTime(localDateTime);
+                isNotePresent.get().setReminderTime(remainder);
                 noteServiceRepository.save(isNotePresent.get());
                 return new Response(200, "Success", isNotePresent.get());
             } else {

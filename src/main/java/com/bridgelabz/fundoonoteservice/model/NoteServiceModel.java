@@ -4,6 +4,7 @@ import com.bridgelabz.fundoonoteservice.dto.NoteServiceDTO;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 /*
@@ -27,7 +28,7 @@ public class NoteServiceModel {
     private Long labelId;
     private String emailId;
     private String color;
-    private LocalDateTime reminderTime;
+    private String reminderTime;
     @ElementCollection(targetClass=String.class)
     private List<String> collaborator;
     private LocalDateTime registerDate;
@@ -36,9 +37,7 @@ public class NoteServiceModel {
     public NoteServiceModel(NoteServiceDTO noteServiceDTO) {
         this.title = noteServiceDTO.getTitle();
         this.description = noteServiceDTO.getDescription();
-        this.userId = noteServiceDTO.getUserId();
         this.emailId = noteServiceDTO.getEmailId();
-        this.collaborator = noteServiceDTO.getCollaborator();
     }
 
 
