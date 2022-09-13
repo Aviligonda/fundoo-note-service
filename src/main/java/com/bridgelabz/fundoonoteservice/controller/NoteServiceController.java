@@ -31,9 +31,8 @@ public class NoteServiceController {
      * */
     @PostMapping("/createNote")
     public ResponseEntity<Response> createNote(@Valid @RequestBody NoteServiceDTO noteServiceDTO,
-                                               @RequestParam List<String> collaborator,
                                                @RequestHeader String token) {
-        Response response = noteService.createNote(noteServiceDTO,collaborator,token);
+        Response response = noteService.createNote(noteServiceDTO,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -45,9 +44,8 @@ public class NoteServiceController {
     @PutMapping("/updateNote/{id}")
     public ResponseEntity<Response> updateNote(@PathVariable Long id,
                                                @Valid @RequestBody NoteServiceDTO noteServiceDTO,
-                                               @RequestParam List<String> collaborator,
                                                @RequestHeader String token) {
-        Response response = noteService.updateNote(id, noteServiceDTO,collaborator,token);
+        Response response = noteService.updateNote(id, noteServiceDTO,token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -210,6 +208,18 @@ public class NoteServiceController {
     @GetMapping("/getAllNotesInArchive")
     public ResponseEntity<List<?>> getAllNotesInArchive(@RequestHeader String token) {
         List<NoteServiceModel> response = noteService.getAllNotesInArchive(token);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PostMapping("/addLabels")
+    public ResponseEntity<Response> addLabels(@RequestParam List<Long> labelId,
+                                                      @RequestParam Long noteId,
+                                                      @RequestHeader String token){
+        Response response =noteService.addLabels(labelId,noteId,token);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PostMapping("/addCollaborator")
+    public ResponseEntity<Response> addCollaborator(@RequestParam String emailId,@RequestParam Long noteId,@RequestParam List<String > collaborator){
+        Response response =noteService.addCollaborator(emailId,noteId,collaborator);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

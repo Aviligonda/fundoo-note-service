@@ -11,12 +11,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/*
+ * Purpose :REST ApIs Controller
+ * Version : 1.0
+ * @author : Aviligonda Sreenivasulu
+ *
+ * */
 @RestController
 @RequestMapping("/label")
 public class LabelController {
     @Autowired
     ILabelService labelService;
 
+    /*
+     * Purpose : Label Details Create
+     * @author : Aviligonda Sreenivasulu
+     * @Param : labelDTO,token
+     * */
     @PostMapping("/create")
     public ResponseEntity<Response> createLabel(@RequestBody LabelDTO labelDTO,
                                                 @RequestHeader String token) {
@@ -24,24 +35,52 @@ public class LabelController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /*
+     * Purpose : Label Details Update
+     * @author : Aviligonda Sreenivasulu
+     * @Param : labelDTO,id,token
+     * */
     @PutMapping("/update/{id}")
     public ResponseEntity<Response> update(@PathVariable Long id,
                                            @RequestBody LabelDTO labelDTO,
                                            @RequestHeader String token) {
-        Response response = labelService.update(id,labelDTO, token);
+        Response response = labelService.update(id, labelDTO, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /*
+     * Purpose : Get All Label Details
+     * @author : Aviligonda Sreenivasulu
+     * @Param : token
+     * */
     @GetMapping("/getAllLabels")
     public ResponseEntity<List<?>> getAllLabels(@RequestHeader String token) {
         List<LabelModel> response = labelService.getAllLabels(token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /*
+     * Purpose : Delete Label Details
+     * @author : Aviligonda Sreenivasulu
+     * @Param : token,id
+     * */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Response> delete(@PathVariable Long id,
                                            @RequestHeader String token) {
-        Response response = labelService.delete(id,token);
+        Response response = labelService.delete(id, token);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /*
+     * Purpose : Add NoteList Details
+     * @author : Aviligonda Sreenivasulu
+     * @Param : noteId,labelId,token
+     * */
+    @PostMapping("/addNotes")
+    public ResponseEntity<Response> addNotes(@RequestParam List<Long> noteId,
+                                             @RequestParam Long labelId,
+                                             @RequestHeader String token) {
+        Response response = labelService.addNotes(labelId, noteId, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

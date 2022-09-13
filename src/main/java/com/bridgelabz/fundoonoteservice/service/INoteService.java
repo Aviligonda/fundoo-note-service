@@ -5,15 +5,16 @@ import com.bridgelabz.fundoonoteservice.model.NoteServiceModel;
 import com.bridgelabz.fundoonoteservice.util.Response;
 
 import java.util.List;
+
 /*
  * Purpose : INoteService to Show The all APIs
  * Version : 1.0
  * @author : Aviligonda Sreenivasulu
  * */
 public interface INoteService {
-    Response createNote(NoteServiceDTO noteServiceDTO, List<String> collaborator, String token);
+    Response createNote(NoteServiceDTO noteServiceDTO, String token);
 
-    Response updateNote(Long id, NoteServiceDTO noteServiceDTO, List<String> collaborator, String token);
+    Response updateNote(Long id, NoteServiceDTO noteServiceDTO, String token);
 
     List<NoteServiceModel> getAllNote(String token);
 
@@ -42,4 +43,8 @@ public interface INoteService {
     List<NoteServiceModel> getAllNotesInPin(String token);
 
     List<NoteServiceModel> getAllNotesInArchive(String token);
+
+    Response addLabels(List<Long> labelId, Long noteId, String token);
+
+    Response addCollaborator(String emailId, Long noteId, List<String> collaborator);
 }

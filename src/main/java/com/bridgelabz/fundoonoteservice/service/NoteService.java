@@ -2,7 +2,9 @@ package com.bridgelabz.fundoonoteservice.service;
 
 import com.bridgelabz.fundoonoteservice.dto.NoteServiceDTO;
 import com.bridgelabz.fundoonoteservice.exception.UserException;
+import com.bridgelabz.fundoonoteservice.model.LabelModel;
 import com.bridgelabz.fundoonoteservice.model.NoteServiceModel;
+import com.bridgelabz.fundoonoteservice.repository.LabelRepository;
 import com.bridgelabz.fundoonoteservice.repository.NoteServiceRepository;
 import com.bridgelabz.fundoonoteservice.util.Response;
 import com.bridgelabz.fundoonoteservice.util.TokenUtil;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +32,8 @@ public class NoteService implements INoteService {
     TokenUtil tokenUtil;
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    LabelRepository labelRepository;
 
     /*
      * Purpose : Implement the Logic of Creating Note Details
@@ -36,7 +41,7 @@ public class NoteService implements INoteService {
      * @Param :  noteServiceDTO
      * */
     @Override
-    public Response createNote(NoteServiceDTO noteServiceDTO, List<String> collaborator, String token) {
+    public Response createNote(NoteServiceDTO noteServiceDTO, String token) {
         boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
         if (isUserPresent) {
             NoteServiceModel noteServiceModel = new NoteServiceModel(noteServiceDTO);
@@ -45,7 +50,6 @@ public class NoteService implements INoteService {
             noteServiceModel.setPin(false);
             noteServiceModel.setArchive(false);
             noteServiceModel.setColor("White");
-            noteServiceModel.setCollaborator(collaborator);
             noteServiceRepository.save(noteServiceModel);
             String body = "Note Added Successfully with id is :" + noteServiceModel.getId();
             String subject = "Note Registration Successfully";
@@ -62,15 +66,13 @@ public class NoteService implements INoteService {
      * @Param :  id,noteServiceDTO
      * */
     @Override
-    public Response updateNote(Long id, NoteServiceDTO noteServiceDTO, List<String> collaborator, String token) {
+    public Response updateNote(Long id, NoteServiceDTO noteServiceDTO, String token) {
         boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
         if (isUserPresent) {
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
                 isNotePresent.get().setTitle(noteServiceDTO.getTitle());
                 isNotePresent.get().setDescription(noteServiceDTO.getDescription());
-                isNotePresent.get().setEmailId(noteServiceDTO.getEmailId());
-                isNotePresent.get().setCollaborator(collaborator);
                 isNotePresent.get().setUpdateDate(LocalDateTime.now());
                 noteServiceRepository.save(isNotePresent.get());
                 String body = "Note Updated Successfully with id is :" + isNotePresent.get().getId();
@@ -392,7 +394,7 @@ public class NoteService implements INoteService {
     /*
      * Purpose : Implement the Logic of Get All Note Details in Archive
      * @author : Aviligonda Sreenivasulu
-     * @Param :
+     * @Param :token
      * */
     @Override
     public List<NoteServiceModel> getAllNotesInArchive(String token) {
@@ -409,4 +411,53 @@ public class NoteService implements INoteService {
         }
     }
 
+    /*
+     * Purpose : Implement the Logic of Add Label List Details
+     * @author : Aviligonda Sreenivasulu
+     * @Param :labelId,noteId,token
+     * */
+    @Override
+    public Response addLabels(List<Long> labelId, Long noteId, String token) {
+        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
+        if (isUserPresent) {
+            List<LabelModel> isLabelPresent = new ArrayList<>();
+            labelId.stream().forEach(label -> {
+                Optional<LabelModel> isLabel = labelRepository.findById(label);
+                if (isLabel.isPresent()) {
+                    isLabelPresent.add(isLabel.get());
+                }
+            });
+            Optional<NoteServiceModel> note = noteServiceRepository.findById(noteId);
+            if (note.isPresent()) {
+                note.get().setLabelList(isLabelPresent);
+                noteServiceRepository.save(note.get());
+                return new Response(200, "Success", note.get());
+            }
+        }
+        return null;
+    }
+
+    /*
+     * Purpose : Implement the Logic of Add Collaborators
+     * @author : Aviligonda Sreenivasulu
+     * @Param : collaborator,noteId,emailId
+     * */
+    @Override
+    public Response addCollaborator(String emailId, Long noteId, List<String> collaborator) {
+        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/emailValidation/" + emailId, Boolean.class);
+        if (isUserPresent) {
+            Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(noteId);
+            if (isNotePresent.isPresent()) {
+                isNotePresent.get().setEmailId(emailId);
+                isNotePresent.get().setCollaborator(collaborator);
+                noteServiceRepository.save(isNotePresent.get());
+                return new Response(200, "Success", isNotePresent.get());
+            } else {
+                throw new UserException(400, "Note Id Not Found");
+            }
+        } else {
+            throw new UserException(400, "Email Id Is Not Found");
+        }
+    }
 }
+

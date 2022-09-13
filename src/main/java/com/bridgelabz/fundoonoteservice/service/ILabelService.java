@@ -6,6 +6,11 @@ import com.bridgelabz.fundoonoteservice.util.Response;
 
 import java.util.List;
 
+/*
+ * Purpose : ILabelService to Show The all APIs
+ * Version : 1.0
+ * @author : Aviligonda Sreenivasulu
+ * */
 public interface ILabelService {
     Response createLabel(LabelDTO labelDTO, String token);
 
@@ -14,4 +19,6 @@ public interface ILabelService {
     List<LabelModel> getAllLabels(String token);
 
     Response update(Long id, LabelDTO labelDTO, String token);
+
+    Response addNotes(Long labelId, List<Long> noteId, String token);
 }

@@ -1,13 +1,13 @@
 package com.bridgelabz.fundoonoteservice.model;
 
 import com.bridgelabz.fundoonoteservice.dto.NoteServiceDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+
 /*
  * Purpose : NoteServiceModel Are Used Create A table and connection to Database
  * Version : 1.0
@@ -30,26 +30,24 @@ public class NoteServiceModel {
     private String emailId;
     private String color;
     private String reminderTime;
-    @ElementCollection(targetClass=String.class)
+    @ElementCollection(targetClass = String.class)
     private List<String> collaborator;
     private LocalDateTime registerDate;
     private LocalDateTime updateDate;
 
-//    @ManyToMany
+    //    @ManyToMany
 //    @JoinTable(name = "note_service_labellist",
 //            joinColumns = @JoinColumn(name = "note_service_model_id", referencedColumnName = "labellist_id"))
 //    private List<LabelModel> labelList = new ArrayList<>();
+    @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     private List<LabelModel> labelList;
-
 
 
     public NoteServiceModel(NoteServiceDTO noteServiceDTO) {
         this.title = noteServiceDTO.getTitle();
         this.description = noteServiceDTO.getDescription();
-        this.emailId = noteServiceDTO.getEmailId();
     }
-
 
 
     public NoteServiceModel() {
