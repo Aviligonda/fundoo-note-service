@@ -4,6 +4,7 @@ import com.bridgelabz.fundoonoteservice.dto.NoteServiceDTO;
 import com.bridgelabz.fundoonoteservice.model.NoteServiceModel;
 import com.bridgelabz.fundoonoteservice.util.Response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /*
@@ -32,7 +33,7 @@ public interface INoteService {
 
     Response changeColourNote(Long id, String colour, String token);
 
-    Response setRemainder(Long id, String remainder, String token);
+    Response setRemainder(Long id, LocalDateTime remainder, String token);
 
     Response unPinNote(Long id, String token);
 
@@ -44,7 +45,8 @@ public interface INoteService {
 
     List<NoteServiceModel> getAllNotesInArchive(String token);
 
-    Response addLabels(List<Long> labelId, Long noteId, String token);
+    Response addLabels(List<Long> labelId, List<Long> noteId, String token);
 
-    Response addCollaborator(String emailId, Long noteId, List<String> collaborator);
+    Response addCollaborator(String token, Long noteId, List<String> collaborator);
+
 }

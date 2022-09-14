@@ -1,11 +1,16 @@
 package com.bridgelabz.fundoonoteservice.model;
 
 import com.bridgelabz.fundoonoteservice.dto.NoteServiceDTO;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /*
@@ -26,20 +31,27 @@ public class NoteServiceModel {
     private boolean trash;
     private boolean isArchive;
     private boolean pin;
-    private Long labelId;
-    private String emailId;
     private String color;
-    private String reminderTime;
+    private LocalDateTime reminderTime;
     @ElementCollection(targetClass = String.class)
     private List<String> collaborator;
     private LocalDateTime registerDate;
     private LocalDateTime updateDate;
 
-    //    @ManyToMany
-//    @JoinTable(name = "note_service_labellist",
-//            joinColumns = @JoinColumn(name = "note_service_model_id", referencedColumnName = "labellist_id"))
+//    @ManyToMany
+//    @JoinTable(name = "note_service_label_list",
+//            joinColumns = @JoinColumn(name = "noteId", referencedColumnName = "labelId"))
 //    private List<LabelModel> labelList = new ArrayList<>();
-    @JsonIgnore
+//
+//    public List<LabelModel> getLabelList() {
+//        return labelList;
+//    }
+//
+//    public void setLabelList(List<LabelModel> labelList) {
+//        this.labelList = labelList;
+//    }
+
+    //    @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     private List<LabelModel> labelList;
 

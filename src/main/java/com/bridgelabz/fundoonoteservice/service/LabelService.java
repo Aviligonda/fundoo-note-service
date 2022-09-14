@@ -114,31 +114,4 @@ public class LabelService implements ILabelService {
         }
     }
 
-    /*
-     * Purpose : Implement the Logic of Add Note List
-     * @author : Aviligonda Sreenivasulu
-     * @Param :  labelId,noteId,token
-     * */
-    @Override
-    public Response addNotes(Long labelId, List<Long> noteId, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
-            List<NoteServiceModel> noteServiceModelList = new ArrayList<>();
-            noteId.stream().forEach(note -> {
-                Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(note);
-                if (isNotePresent.isPresent()) {
-                    noteServiceModelList.add(isNotePresent.get());
-                }
-            });
-            Optional<LabelModel> isLabelPresent = labelRepository.findById(labelId);
-            if (isLabelPresent.isPresent()) {
-                isLabelPresent.get().setNotes(noteServiceModelList);
-                labelRepository.save(isLabelPresent.get());
-                return new Response(200, "Success", isLabelPresent.get());
-            } else {
-                throw new UserException(400, "Label Id is Not Present");
-            }
-        }
-        throw new UserException(400, "Token is Wrong");
-    }
 }

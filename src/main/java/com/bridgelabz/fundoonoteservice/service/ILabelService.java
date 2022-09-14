@@ -20,5 +20,4 @@ public interface ILabelService {
 
     Response update(Long id, LabelDTO labelDTO, String token);
 
-    Response addNotes(Long labelId, List<Long> noteId, String token);
 }

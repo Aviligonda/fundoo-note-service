@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /*
@@ -32,7 +33,7 @@ public class NoteServiceController {
     @PostMapping("/createNote")
     public ResponseEntity<Response> createNote(@Valid @RequestBody NoteServiceDTO noteServiceDTO,
                                                @RequestHeader String token) {
-        Response response = noteService.createNote(noteServiceDTO,token);
+        Response response = noteService.createNote(noteServiceDTO, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -45,7 +46,7 @@ public class NoteServiceController {
     public ResponseEntity<Response> updateNote(@PathVariable Long id,
                                                @Valid @RequestBody NoteServiceDTO noteServiceDTO,
                                                @RequestHeader String token) {
-        Response response = noteService.updateNote(id, noteServiceDTO,token);
+        Response response = noteService.updateNote(id, noteServiceDTO, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -68,7 +69,7 @@ public class NoteServiceController {
     @GetMapping("/getNoteById/{id}")
     public ResponseEntity<Response> getNoteById(@PathVariable Long id,
                                                 @RequestHeader String token) {
-        Response response = noteService.getNoteById(id,token);
+        Response response = noteService.getNoteById(id, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -80,7 +81,7 @@ public class NoteServiceController {
     @DeleteMapping("/permanentDelete/{id}")
     public ResponseEntity<Response> permanentDelete(@PathVariable Long id,
                                                     @RequestHeader String token) {
-        Response response = noteService.permanentDelete(id,token);
+        Response response = noteService.permanentDelete(id, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -92,7 +93,7 @@ public class NoteServiceController {
     @DeleteMapping("/trashNote/{id}")
     public ResponseEntity<Response> trashNote(@PathVariable Long id,
                                               @RequestHeader String token) {
-        Response response = noteService.trashNote(id,token);
+        Response response = noteService.trashNote(id, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -104,7 +105,7 @@ public class NoteServiceController {
     @PutMapping("/restoreNote/{id}")
     public ResponseEntity<Response> restoreNote(@PathVariable Long id,
                                                 @RequestHeader String token) {
-        Response response = noteService.restoreNote(id,token);
+        Response response = noteService.restoreNote(id, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -116,7 +117,7 @@ public class NoteServiceController {
     @PutMapping("/archiveNote/{id}")
     public ResponseEntity<Response> archiveNote(@PathVariable Long id,
                                                 @RequestHeader String token) {
-        Response response = noteService.archiveNote(id,token);
+        Response response = noteService.archiveNote(id, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -128,7 +129,7 @@ public class NoteServiceController {
     @PutMapping("/pinNote/{id}")
     public ResponseEntity<Response> pinNote(@PathVariable Long id,
                                             @RequestHeader String token) {
-        Response response = noteService.pinNote(id,token);
+        Response response = noteService.pinNote(id, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -141,7 +142,7 @@ public class NoteServiceController {
     public ResponseEntity<Response> changeColourNote(@PathVariable Long id,
                                                      @RequestParam String colour,
                                                      @RequestHeader String token) {
-        Response response = noteService.changeColourNote(id, colour,token);
+        Response response = noteService.changeColourNote(id, colour, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -152,11 +153,12 @@ public class NoteServiceController {
      * */
     @PostMapping("/setRemainder/{id}")
     public ResponseEntity<Response> setRemainder(@PathVariable Long id,
-                                                 @RequestParam String remainder,
+                                                 @RequestParam LocalDateTime remainder,
                                                  @RequestHeader String token) {
-        Response response = noteService.setRemainder(id, remainder,token);
+        Response response = noteService.setRemainder(id, remainder, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
     /*
      * Purpose : unArchiveNote Details by Id
      * @author : Aviligonda Sreenivasulu
@@ -165,7 +167,7 @@ public class NoteServiceController {
     @PutMapping("/unArchiveNote/{id}")
     public ResponseEntity<Response> unArchiveNote(@PathVariable Long id,
                                                   @RequestHeader String token) {
-        Response response = noteService.unArchiveNote(id,token);
+        Response response = noteService.unArchiveNote(id, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -177,9 +179,10 @@ public class NoteServiceController {
     @PutMapping("/unPinNote/{id}")
     public ResponseEntity<Response> unPinNote(@PathVariable Long id,
                                               @RequestHeader String token) {
-        Response response = noteService.unPinNote(id,token);
+        Response response = noteService.unPinNote(id, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
     /*
      * Purpose : Get All Note Details in Trash
      * @author : Aviligonda Sreenivasulu
@@ -190,6 +193,7 @@ public class NoteServiceController {
         List<NoteServiceModel> response = noteService.getAllNotesInTrash(token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
     /*
      * Purpose : Get All Note Details in Pin
      * @author : Aviligonda Sreenivasulu
@@ -200,6 +204,7 @@ public class NoteServiceController {
         List<NoteServiceModel> response = noteService.getAllNotesInPin(token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
     /*
      * Purpose : Get All Note Details in Archive
      * @author : Aviligonda Sreenivasulu
@@ -210,16 +215,28 @@ public class NoteServiceController {
         List<NoteServiceModel> response = noteService.getAllNotesInArchive(token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    /*
+     * Purpose : Add LabelsList into multiple notes
+     * @author : Aviligonda Sreenivasulu
+     * @Param : labelId,noteId,token
+     * */
     @PostMapping("/addLabels")
     public ResponseEntity<Response> addLabels(@RequestParam List<Long> labelId,
-                                                      @RequestParam Long noteId,
-                                                      @RequestHeader String token){
-        Response response =noteService.addLabels(labelId,noteId,token);
+                                              @RequestParam List<Long> noteId,
+                                              @RequestHeader String token) {
+        Response response = noteService.addLabels(labelId, noteId, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    /*
+     * Purpose : Add Collaborators
+     * @author : Aviligonda Sreenivasulu
+     * @Param : token,noteId,collaborator
+     * */
     @PostMapping("/addCollaborator")
-    public ResponseEntity<Response> addCollaborator(@RequestParam String emailId,@RequestParam Long noteId,@RequestParam List<String > collaborator){
-        Response response =noteService.addCollaborator(emailId,noteId,collaborator);
+    public ResponseEntity<Response> addCollaborator(@RequestHeader String token, @RequestParam Long noteId, @RequestParam List<String> collaborator) {
+        Response response = noteService.addCollaborator(token, noteId, collaborator);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

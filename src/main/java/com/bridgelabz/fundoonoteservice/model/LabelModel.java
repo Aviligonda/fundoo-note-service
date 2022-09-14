@@ -22,12 +22,11 @@ public class LabelModel {
     private Long id;
     private String labelName;
     private Long userId;
-    private Long noteId;
     private LocalDateTime registerDate;
     private LocalDateTime updateDate;
     @JsonIgnore
     @ManyToMany(mappedBy = "labelList")
-    private List<NoteServiceModel> notes;
+    private List<NoteServiceModel> noteList;
 
     public LabelModel(LabelDTO labelDTO) {
         labelName = labelDTO.getLabelName();

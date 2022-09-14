@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,9 +52,6 @@ public class NoteService implements INoteService {
             noteServiceModel.setArchive(false);
             noteServiceModel.setColor("White");
             noteServiceRepository.save(noteServiceModel);
-            String body = "Note Added Successfully with id is :" + noteServiceModel.getId();
-            String subject = "Note Registration Successfully";
-            mailService.send(noteServiceModel.getEmailId(), body, subject);
             return new Response(200, "Success", noteServiceModel);
         } else {
             throw new UserException(400, "Token Wrong");
@@ -75,9 +73,6 @@ public class NoteService implements INoteService {
                 isNotePresent.get().setDescription(noteServiceDTO.getDescription());
                 isNotePresent.get().setUpdateDate(LocalDateTime.now());
                 noteServiceRepository.save(isNotePresent.get());
-                String body = "Note Updated Successfully with id is :" + isNotePresent.get().getId();
-                String subject = "Note Updated Successfully";
-                mailService.send(isNotePresent.get().getEmailId(), body, subject);
                 return new Response(200, "Success", isNotePresent.get());
             } else {
                 throw new UserException(400, "No Note Found With this Id");
@@ -140,9 +135,6 @@ public class NoteService implements INoteService {
             if (isNotePresent.isPresent()) {
                 if (isNotePresent.get().isTrash()) {
                     noteServiceRepository.delete(isNotePresent.get());
-                    String body = "Note Deleted Successfully with id is :" + isNotePresent.get().getId();
-                    String subject = "Note Registration Successfully";
-                    mailService.send(isNotePresent.get().getEmailId(), body, subject);
                     return new Response(200, "Success", isNotePresent.get());
                 } else {
                     throw new UserException(400, "No Note found in trash with this id");
@@ -282,7 +274,7 @@ public class NoteService implements INoteService {
      * @Param :  id,localDateTime
      * */
     @Override
-    public Response setRemainder(Long id, String remainder, String token) {
+    public Response setRemainder(Long id, LocalDateTime remainder, String token) {
         boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
         if (isUserPresent) {
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
@@ -417,47 +409,60 @@ public class NoteService implements INoteService {
      * @Param :labelId,noteId,token
      * */
     @Override
-    public Response addLabels(List<Long> labelId, Long noteId, String token) {
+    public Response addLabels(List<Long> labelId, List<Long> noteId, String token) {
         boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
         if (isUserPresent) {
             List<LabelModel> isLabelPresent = new ArrayList<>();
+            List<NoteServiceModel> noteServiceModelList = new ArrayList<>();
             labelId.stream().forEach(label -> {
                 Optional<LabelModel> isLabel = labelRepository.findById(label);
                 if (isLabel.isPresent()) {
                     isLabelPresent.add(isLabel.get());
+                    isLabel.get().setNoteList(noteServiceModelList);
+                    labelRepository.save(isLabel.get());
                 }
             });
-            Optional<NoteServiceModel> note = noteServiceRepository.findById(noteId);
-            if (note.isPresent()) {
-                note.get().setLabelList(isLabelPresent);
-                noteServiceRepository.save(note.get());
-                return new Response(200, "Success", note.get());
-            }
+            noteId.stream().forEach(note -> {
+                Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(note);
+                if (isNotePresent.isPresent()) {
+                    noteServiceModelList.add(isNotePresent.get());
+                    isNotePresent.get().setLabelList(isLabelPresent);
+                    noteServiceRepository.save(isNotePresent.get());
+                }
+            });
+            return new Response(200, "Success", isUserPresent);
+        } else {
+            return new Response(400, "Failed", isUserPresent);
         }
-        return null;
     }
 
     /*
      * Purpose : Implement the Logic of Add Collaborators
      * @author : Aviligonda Sreenivasulu
-     * @Param : collaborator,noteId,emailId
+     * @Param : collaborator,noteId,token
      * */
     @Override
-    public Response addCollaborator(String emailId, Long noteId, List<String> collaborator) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/emailValidation/" + emailId, Boolean.class);
+    public Response addCollaborator(String token, Long noteId, List<String> collaborator) {
+        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
         if (isUserPresent) {
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(noteId);
             if (isNotePresent.isPresent()) {
-                isNotePresent.get().setEmailId(emailId);
-                isNotePresent.get().setCollaborator(collaborator);
+                List<String> collaboratorsList = new ArrayList<>();
+                collaborator.stream().forEach(collab -> {
+                    boolean isUser = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/emailValidation/" + collab, Boolean.class);
+                    if (isUser) {
+                        collaboratorsList.add(collab);
+                    }
+                });
+                isNotePresent.get().setCollaborator(collaboratorsList);
                 noteServiceRepository.save(isNotePresent.get());
                 return new Response(200, "Success", isNotePresent.get());
             } else {
                 throw new UserException(400, "Note Id Not Found");
             }
-        } else {
-            throw new UserException(400, "Email Id Is Not Found");
         }
+        throw new UserException(400, "Token is Wrong");
     }
+
 }
 

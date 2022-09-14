@@ -71,16 +71,4 @@ public class LabelController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    /*
-     * Purpose : Add NoteList Details
-     * @author : Aviligonda Sreenivasulu
-     * @Param : noteId,labelId,token
-     * */
-    @PostMapping("/addNotes")
-    public ResponseEntity<Response> addNotes(@RequestParam List<Long> noteId,
-                                             @RequestParam Long labelId,
-                                             @RequestHeader String token) {
-        Response response = labelService.addNotes(labelId, noteId, token);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 }
