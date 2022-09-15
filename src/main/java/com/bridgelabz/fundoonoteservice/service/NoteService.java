@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,6 +71,7 @@ public class NoteService implements INoteService {
             if (isNotePresent.isPresent()) {
                 isNotePresent.get().setTitle(noteServiceDTO.getTitle());
                 isNotePresent.get().setDescription(noteServiceDTO.getDescription());
+                isNotePresent.get().setEmail(noteServiceDTO.getEmail());
                 isNotePresent.get().setUpdateDate(LocalDateTime.now());
                 noteServiceRepository.save(isNotePresent.get());
                 return new Response(200, "Success", isNotePresent.get());
@@ -274,7 +275,7 @@ public class NoteService implements INoteService {
      * @Param :  id,localDateTime
      * */
     @Override
-    public Response setRemainder(Long id, LocalDateTime remainder, String token) {
+    public Response setRemainder(Long id, Date remainder, String token) {
         boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
         if (isUserPresent) {
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
@@ -412,21 +413,21 @@ public class NoteService implements INoteService {
     public Response addLabels(List<Long> labelId, List<Long> noteId, String token) {
         boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
         if (isUserPresent) {
-            List<LabelModel> isLabelPresent = new ArrayList<>();
+            List<LabelModel> labelModelList = new ArrayList<>();
             List<NoteServiceModel> noteServiceModelList = new ArrayList<>();
             labelId.stream().forEach(label -> {
-                Optional<LabelModel> isLabel = labelRepository.findById(label);
-                if (isLabel.isPresent()) {
-                    isLabelPresent.add(isLabel.get());
-                    isLabel.get().setNoteList(noteServiceModelList);
-                    labelRepository.save(isLabel.get());
+                Optional<LabelModel> isLabelPresent = labelRepository.findById(label);
+                if (isLabelPresent.isPresent()) {
+                    labelModelList.add(isLabelPresent.get());
+                    isLabelPresent.get().setNoteList(noteServiceModelList);
+                    labelRepository.save(isLabelPresent.get());
                 }
             });
             noteId.stream().forEach(note -> {
                 Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(note);
                 if (isNotePresent.isPresent()) {
                     noteServiceModelList.add(isNotePresent.get());
-                    isNotePresent.get().setLabelList(isLabelPresent);
+                    isNotePresent.get().setLabelList(labelModelList);
                     noteServiceRepository.save(isNotePresent.get());
                 }
             });

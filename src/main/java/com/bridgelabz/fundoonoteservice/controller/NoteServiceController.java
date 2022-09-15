@@ -5,12 +5,15 @@ import com.bridgelabz.fundoonoteservice.model.NoteServiceModel;
 import com.bridgelabz.fundoonoteservice.service.INoteService;
 import com.bridgelabz.fundoonoteservice.util.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /*
@@ -153,7 +156,7 @@ public class NoteServiceController {
      * */
     @PostMapping("/setRemainder/{id}")
     public ResponseEntity<Response> setRemainder(@PathVariable Long id,
-                                                 @RequestParam LocalDateTime remainder,
+                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date remainder,
                                                  @RequestHeader String token) {
         Response response = noteService.setRemainder(id, remainder, token);
         return new ResponseEntity<>(response, HttpStatus.OK);

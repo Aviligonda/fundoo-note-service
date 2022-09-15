@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /*
@@ -29,7 +30,7 @@ public class LabelController {
      * @Param : labelDTO,token
      * */
     @PostMapping("/create")
-    public ResponseEntity<Response> createLabel(@RequestBody LabelDTO labelDTO,
+    public ResponseEntity<Response> createLabel(@Valid @RequestBody LabelDTO labelDTO,
                                                 @RequestHeader String token) {
         Response response = labelService.createLabel(labelDTO, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -42,7 +43,7 @@ public class LabelController {
      * */
     @PutMapping("/update/{id}")
     public ResponseEntity<Response> update(@PathVariable Long id,
-                                           @RequestBody LabelDTO labelDTO,
+                                           @Valid @RequestBody LabelDTO labelDTO,
                                            @RequestHeader String token) {
         Response response = labelService.update(id, labelDTO, token);
         return new ResponseEntity<>(response, HttpStatus.OK);

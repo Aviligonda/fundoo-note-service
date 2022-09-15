@@ -1,16 +1,14 @@
 package com.bridgelabz.fundoonoteservice.model;
 
 import com.bridgelabz.fundoonoteservice.dto.NoteServiceDTO;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonView;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /*
@@ -32,7 +30,9 @@ public class NoteServiceModel {
     private boolean isArchive;
     private boolean pin;
     private String color;
-    private LocalDateTime reminderTime;
+    private String email;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date reminderTime;
     @ElementCollection(targetClass = String.class)
     private List<String> collaborator;
     private LocalDateTime registerDate;
@@ -51,7 +51,7 @@ public class NoteServiceModel {
 //        this.labelList = labelList;
 //    }
 
-    //    @JsonIgnore
+    //        @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     private List<LabelModel> labelList;
 
@@ -59,6 +59,7 @@ public class NoteServiceModel {
     public NoteServiceModel(NoteServiceDTO noteServiceDTO) {
         this.title = noteServiceDTO.getTitle();
         this.description = noteServiceDTO.getDescription();
+        this.email = noteServiceDTO.getEmail();
     }
 
 

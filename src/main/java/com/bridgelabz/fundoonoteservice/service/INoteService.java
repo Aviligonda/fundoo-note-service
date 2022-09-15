@@ -4,7 +4,7 @@ import com.bridgelabz.fundoonoteservice.dto.NoteServiceDTO;
 import com.bridgelabz.fundoonoteservice.model.NoteServiceModel;
 import com.bridgelabz.fundoonoteservice.util.Response;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /*
@@ -33,7 +33,7 @@ public interface INoteService {
 
     Response changeColourNote(Long id, String colour, String token);
 
-    Response setRemainder(Long id, LocalDateTime remainder, String token);
+    Response setRemainder(Long id, Date remainder, String token);
 
     Response unPinNote(Long id, String token);
 

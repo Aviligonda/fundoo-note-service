@@ -152,7 +152,7 @@ public class SpringFoxConfig implements WebMvcConfigurer {
 
     private ApiInfo apiInfo() {
 
-        return new ApiInfo("Fundoo User Service",
+        return new ApiInfo("Fundoo Note Service",
 
                 "APIs for E.",
 
@@ -160,7 +160,7 @@ public class SpringFoxConfig implements WebMvcConfigurer {
 
                 "Terms of service",
 
-                new Contact("Fundoo User Service", "http://bridgelabz.com&quot;", "sunil.patil@bridgelabz.com"),
+                new Contact("Fundoo Note Service", "http://bridgelabz.com&quot;", "sunil.patil@bridgelabz.com"),
 
                 "Apache 2.0",
 
