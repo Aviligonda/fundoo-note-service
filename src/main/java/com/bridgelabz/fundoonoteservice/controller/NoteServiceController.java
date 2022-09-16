@@ -156,7 +156,7 @@ public class NoteServiceController {
      * */
     @PostMapping("/setRemainder/{id}")
     public ResponseEntity<Response> setRemainder(@PathVariable Long id,
-                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date remainder,
+                                                 @RequestParam  String remainder,
                                                  @RequestHeader String token) {
         Response response = noteService.setRemainder(id, remainder, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -225,8 +225,8 @@ public class NoteServiceController {
      * @Param : labelId,noteId,token
      * */
     @PostMapping("/addLabels")
-    public ResponseEntity<Response> addLabels(@RequestParam List<Long> labelId,
-                                              @RequestParam List<Long> noteId,
+    public ResponseEntity<Response> addLabels(@RequestParam Long labelId,
+                                              @RequestParam Long noteId,
                                               @RequestHeader String token) {
         Response response = noteService.addLabels(labelId, noteId, token);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -238,7 +238,9 @@ public class NoteServiceController {
      * @Param : token,noteId,collaborator
      * */
     @PostMapping("/addCollaborator")
-    public ResponseEntity<Response> addCollaborator(@RequestHeader String token, @RequestParam Long noteId, @RequestParam List<String> collaborator) {
+    public ResponseEntity<Response> addCollaborator(@RequestHeader String token,
+                                                    @RequestParam Long noteId,
+                                                    @RequestParam String collaborator) {
         Response response = noteService.addCollaborator(token, noteId, collaborator);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

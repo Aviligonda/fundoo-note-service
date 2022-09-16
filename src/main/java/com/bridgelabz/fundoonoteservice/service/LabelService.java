@@ -40,15 +40,16 @@ public class LabelService implements ILabelService {
      * */
     @Override
     public Response createLabel(LabelDTO labelDTO, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        Long userId = tokenUtil.decodeToken(token);
+        if (isUserPresent.getStatusCode() == 200) {
             LabelModel labelModel = new LabelModel(labelDTO);
             labelModel.setRegisterDate(LocalDateTime.now());
+            labelModel.setUserId(userId);
             labelRepository.save(labelModel);
             return new Response(200, "Success", labelModel);
-        } else {
-            throw new UserException(400, "Token Wrong");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -58,18 +59,20 @@ public class LabelService implements ILabelService {
      * */
     @Override
     public Response delete(Long id, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        Long userId = tokenUtil.decodeToken(token);
+        if (isUserPresent.getStatusCode() == 200) {
             Optional<LabelModel> isLabelPresent = labelRepository.findById(id);
             if (isLabelPresent.isPresent()) {
-                labelRepository.delete(isLabelPresent.get());
-                return new Response(200, "Success", isLabelPresent.get());
-            } else {
-                throw new UserException(400, "Not Found with this Id");
+                if (isLabelPresent.get().getUserId() == userId) {
+                    labelRepository.delete(isLabelPresent.get());
+                    return new Response(200, "Success", isLabelPresent.get());
+                }
+                throw new UserException(400, "No Label Found with this UserId");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No Label Found with this Id");
         }
+        throw new UserException(400, "Token Wrong");
     }
     /*
      * Purpose : Implement the Logic of Get All label Details
@@ -79,17 +82,16 @@ public class LabelService implements ILabelService {
 
     @Override
     public List<LabelModel> getAllLabels(String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
-            List<LabelModel> isLabelPresent = labelRepository.findAll();
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        Long userId = tokenUtil.decodeToken(token);
+        if (isUserPresent.getStatusCode() == 200) {
+            List<LabelModel> isLabelPresent = labelRepository.findAllByUserId(userId);
             if (isLabelPresent.size() > 0) {
                 return isLabelPresent;
-            } else {
-                throw new UserException(400, "No Labels Found");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No Labels Found With this UserId");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -99,19 +101,20 @@ public class LabelService implements ILabelService {
      * */
     @Override
     public Response update(Long id, LabelDTO labelDTO, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        Long userId = tokenUtil.decodeToken(token);
+        if (isUserPresent.getStatusCode() == 200) {
             Optional<LabelModel> isLabelPresent = labelRepository.findById(id);
             if (isLabelPresent.isPresent()) {
-                isLabelPresent.get().setLabelName(labelDTO.getLabelName());
-                isLabelPresent.get().setUpdateDate(LocalDateTime.now());
-                return new Response(200, "Success", isLabelPresent.get());
-            } else {
-                throw new UserException(400, "Not Found with this Id");
+                if (isLabelPresent.get().getUserId() == userId) {
+                    isLabelPresent.get().setLabelName(labelDTO.getLabelName());
+                    isLabelPresent.get().setUpdateDate(LocalDateTime.now());
+                    return new Response(200, "Success", isLabelPresent.get());
+                }
+                throw new UserException(400, "Not Found with this UserId");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "Not Found with this Id");
         }
+        throw new UserException(400, "Token Wrong");
     }
-
 }

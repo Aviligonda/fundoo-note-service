@@ -12,9 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,19 +44,20 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response createNote(NoteServiceDTO noteServiceDTO, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             NoteServiceModel noteServiceModel = new NoteServiceModel(noteServiceDTO);
             noteServiceModel.setRegisterDate(LocalDateTime.now());
+            noteServiceModel.setUserId(userId);
             noteServiceModel.setTrash(false);
             noteServiceModel.setPin(false);
             noteServiceModel.setArchive(false);
             noteServiceModel.setColor("White");
             noteServiceRepository.save(noteServiceModel);
             return new Response(200, "Success", noteServiceModel);
-        } else {
-            throw new UserException(400, "Token Wrong");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -65,22 +67,24 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response updateNote(Long id, NoteServiceDTO noteServiceDTO, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                isNotePresent.get().setTitle(noteServiceDTO.getTitle());
-                isNotePresent.get().setDescription(noteServiceDTO.getDescription());
-                isNotePresent.get().setEmail(noteServiceDTO.getEmail());
-                isNotePresent.get().setUpdateDate(LocalDateTime.now());
-                noteServiceRepository.save(isNotePresent.get());
-                return new Response(200, "Success", isNotePresent.get());
-            } else {
-                throw new UserException(400, "No Note Found With this Id");
+                if (isNotePresent.get().getUserId() == userId) {
+                    isNotePresent.get().setTitle(noteServiceDTO.getTitle());
+                    isNotePresent.get().setDescription(noteServiceDTO.getDescription());
+                    isNotePresent.get().setEmail(noteServiceDTO.getEmail());
+                    isNotePresent.get().setUpdateDate(LocalDateTime.now());
+                    noteServiceRepository.save(isNotePresent.get());
+                    return new Response(200, "Success", isNotePresent.get());
+                }
+                throw new UserException(400, "UserId Did't Match");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No Note Found With this Id");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -90,17 +94,16 @@ public class NoteService implements INoteService {
      * */
     @Override
     public List<NoteServiceModel> getAllNote(String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
-            List<NoteServiceModel> isNotePresent = noteServiceRepository.findAll();
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
+            List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByUserId(userId);
             if (isNotePresent.size() > 0) {
                 return isNotePresent;
-            } else {
-                throw new UserException(400, "No notes Found");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No notes Found With This User");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -110,17 +113,19 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response getNoteById(Long id, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                return new Response(200, "Success", isNotePresent.get());
-            } else {
-                throw new UserException(400, "No Note Found With this Id");
+                if (isNotePresent.get().getUserId() == userId) {
+                    return new Response(200, "Success", isNotePresent.get());
+                }
+                throw new UserException(400, "No Note Found With this UserId");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No Note Found With this Id");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -130,21 +135,23 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response permanentDelete(Long id, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                if (isNotePresent.get().isTrash()) {
-                    noteServiceRepository.delete(isNotePresent.get());
-                    return new Response(200, "Success", isNotePresent.get());
-                } else {
+                if (isNotePresent.get().getUserId() == userId) {
+                    if (isNotePresent.get().isTrash()) {
+                        noteServiceRepository.delete(isNotePresent.get());
+                        return new Response(200, "Success", isNotePresent.get());
+                    }
                     throw new UserException(400, "No Note found in trash with this id");
                 }
+                throw new UserException(400, "No Note Found With this UserId");
             }
-            throw new UserException(400, "No Note Found With this Id");
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No Note Found With this UserId");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -154,19 +161,21 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response trashNote(Long id, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                isNotePresent.get().setTrash(true);
-                noteServiceRepository.save(isNotePresent.get());
-                return new Response(200, "Success", isNotePresent.get());
-            } else {
-                throw new UserException(400, "No note found with this id");
+                if (isNotePresent.get().getUserId() == userId) {
+                    isNotePresent.get().setTrash(true);
+                    noteServiceRepository.save(isNotePresent.get());
+                    return new Response(200, "Success", isNotePresent.get());
+                }
+                throw new UserException(400, "No note found with this UserId");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No Note Found With this Id");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -176,22 +185,24 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response restoreNote(Long id, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                if (isNotePresent.get().isTrash()) {
-                    isNotePresent.get().setTrash(false);
-                    noteServiceRepository.save(isNotePresent.get());
-                    return new Response(200, "Success", isNotePresent.get());
-                } else {
+                if (isNotePresent.get().getUserId() == userId) {
+                    if (isNotePresent.get().isTrash()) {
+                        isNotePresent.get().setTrash(false);
+                        noteServiceRepository.save(isNotePresent.get());
+                        return new Response(200, "Success", isNotePresent.get());
+                    }
                     throw new UserException(400, "No Note found in trash with this id");
                 }
+                throw new UserException(400, "No Note Found With this UserId");
             }
             throw new UserException(400, "No Note Found With this Id");
-        } else {
-            throw new UserException(400, "Token Wrong");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -201,23 +212,26 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response archiveNote(Long id, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                if (!isNotePresent.get().isTrash()) {
-                    isNotePresent.get().setArchive(true);
-                    noteServiceRepository.save(isNotePresent.get());
-                    return new Response(200, "Success", isNotePresent.get());
-                } else {
+                if (isNotePresent.get().getUserId() == userId) {
+                    if (!isNotePresent.get().isTrash()) {
+                        isNotePresent.get().setArchive(true);
+                        noteServiceRepository.save(isNotePresent.get());
+                        return new Response(200, "Success", isNotePresent.get());
+                    }
                     throw new UserException(400, " Note found in trash, Not possible to archive");
                 }
+                throw new UserException(400, "No Note found  with this UserId");
             }
             throw new UserException(400, "No Note found  with this id");
-        } else {
-            throw new UserException(400, "Token Wrong");
         }
+        throw new UserException(400, "Token Wrong");
     }
+
 
     /*
      * Purpose : Implement the Logic of pin note Details
@@ -226,22 +240,24 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response pinNote(Long id, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                if (!isNotePresent.get().isTrash()) {
-                    isNotePresent.get().setPin(true);
-                    noteServiceRepository.save(isNotePresent.get());
-                    return new Response(200, "Success", isNotePresent.get());
-                } else {
+                if (isNotePresent.get().getUserId() == userId) {
+                    if (!isNotePresent.get().isTrash()) {
+                        isNotePresent.get().setPin(true);
+                        noteServiceRepository.save(isNotePresent.get());
+                        return new Response(200, "Success", isNotePresent.get());
+                    }
                     throw new UserException(400, " Note found in trash, Not possible to pin");
                 }
+                throw new UserException(400, "No Note found  with this UserId");
             }
             throw new UserException(400, "No Note found  with this id");
-        } else {
-            throw new UserException(400, "Token Wrong");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -251,22 +267,24 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response changeColourNote(Long id, String colour, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                if (!isNotePresent.get().isTrash()) {
-                    isNotePresent.get().setColor(colour);
-                    noteServiceRepository.save(isNotePresent.get());
-                    return new Response(200, "Success", isNotePresent.get());
-                } else {
+                if (isNotePresent.get().getUserId() == userId) {
+                    if (!isNotePresent.get().isTrash()) {
+                        isNotePresent.get().setColor(colour);
+                        noteServiceRepository.save(isNotePresent.get());
+                        return new Response(200, "Success", isNotePresent.get());
+                    }
                     throw new UserException(400, " Note found in trash, Not possible to change colour");
                 }
+                throw new UserException(400, "No Note found  with this UserId");
             }
             throw new UserException(400, "No Note found  with this id");
-        } else {
-            throw new UserException(400, "Token Wrong");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -275,23 +293,25 @@ public class NoteService implements INoteService {
      * @Param :  id,localDateTime
      * */
     @Override
-    public Response setRemainder(Long id, Date remainder, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+    public Response setRemainder(Long id, String remainder, String token) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                if (!isNotePresent.get().isTrash()) {
-                    isNotePresent.get().setReminderTime(remainder);
-                    noteServiceRepository.save(isNotePresent.get());
-                    return new Response(200, "Success", isNotePresent.get());
-                } else {
+                if (isNotePresent.get().getUserId() == userId) {
+                    if (!isNotePresent.get().isTrash()) {
+                        isNotePresent.get().setReminderTime(remainder);
+                        noteServiceRepository.save(isNotePresent.get());
+                        return new Response(200, "Success", isNotePresent.get());
+                    }
                     throw new UserException(400, " Note found in trash, Not possible to Set Remainder");
                 }
+                throw new UserException(400, "No Note found  with this UserId");
             }
             throw new UserException(400, "No Note found  with this id");
-        } else {
-            throw new UserException(400, "Token Wrong");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -301,22 +321,24 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response unPinNote(Long id, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                if (!isNotePresent.get().isTrash()) {
-                    isNotePresent.get().setPin(false);
-                    noteServiceRepository.save(isNotePresent.get());
-                    return new Response(200, "Success", isNotePresent.get());
-                } else {
+                if (isNotePresent.get().getUserId() == userId) {
+                    if (!isNotePresent.get().isTrash()) {
+                        isNotePresent.get().setPin(false);
+                        noteServiceRepository.save(isNotePresent.get());
+                        return new Response(200, "Success", isNotePresent.get());
+                    }
                     throw new UserException(400, " Note found in trash, Not possible to UnPin");
                 }
+                throw new UserException(400, "No Note found  with this UserId");
             }
             throw new UserException(400, "No Note found  with this id");
-        } else {
-            throw new UserException(400, "Token Wrong");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -326,22 +348,24 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response unArchiveNote(Long id, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(id);
             if (isNotePresent.isPresent()) {
-                if (!isNotePresent.get().isTrash()) {
-                    isNotePresent.get().setArchive(false);
-                    noteServiceRepository.save(isNotePresent.get());
-                    return new Response(200, "Success", isNotePresent.get());
-                } else {
+                if (isNotePresent.get().getUserId() == userId) {
+                    if (!isNotePresent.get().isTrash()) {
+                        isNotePresent.get().setArchive(false);
+                        noteServiceRepository.save(isNotePresent.get());
+                        return new Response(200, "Success", isNotePresent.get());
+                    }
                     throw new UserException(400, " Note found in trash, Not possible to archive");
                 }
+                throw new UserException(400, "No Note found  with this Userid");
             }
             throw new UserException(400, "No Note found  with this id");
-        } else {
-            throw new UserException(400, "Token Wrong");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -351,17 +375,16 @@ public class NoteService implements INoteService {
      * */
     @Override
     public List<NoteServiceModel> getAllNotesInTrash(String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
-            List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByTrash();
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
+            List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByTrash(userId);
             if (isNotePresent.size() > 0) {
                 return isNotePresent;
-            } else {
-                throw new UserException(400, "No notes Found in Trash");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No notes Found in Trash With this UserId");
         }
+        throw new UserException(400, "Token is Wrong");
     }
 
     /*
@@ -371,17 +394,16 @@ public class NoteService implements INoteService {
      * */
     @Override
     public List<NoteServiceModel> getAllNotesInPin(String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
-            List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByPin();
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
+            List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByPin(userId);
             if (isNotePresent.size() > 0) {
                 return isNotePresent;
-            } else {
-                throw new UserException(400, "No notes Found in Pin");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No notes Found in Pin With this UserId");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -391,17 +413,16 @@ public class NoteService implements INoteService {
      * */
     @Override
     public List<NoteServiceModel> getAllNotesInArchive(String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
-            List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByArchive();
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
+            List<NoteServiceModel> isNotePresent = noteServiceRepository.findAllByArchive(userId);
             if (isNotePresent.size() > 0) {
                 return isNotePresent;
-            } else {
-                throw new UserException(400, "No notes Found in Archive");
             }
-        } else {
-            throw new UserException(400, "Token Wrong");
+            throw new UserException(400, "No notes Found in Archive With this UserId");
         }
+        throw new UserException(400, "Token Wrong");
     }
 
     /*
@@ -410,31 +431,35 @@ public class NoteService implements INoteService {
      * @Param :labelId,noteId,token
      * */
     @Override
-    public Response addLabels(List<Long> labelId, List<Long> noteId, String token) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+    public Response addLabels(Long labelId, Long noteId, String token) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             List<LabelModel> labelModelList = new ArrayList<>();
             List<NoteServiceModel> noteServiceModelList = new ArrayList<>();
-            labelId.stream().forEach(label -> {
-                Optional<LabelModel> isLabelPresent = labelRepository.findById(label);
-                if (isLabelPresent.isPresent()) {
+            Optional<LabelModel> isLabelPresent = labelRepository.findById(labelId);
+            if (isLabelPresent.isPresent()) {
+                if (isLabelPresent.get().getUserId() == userId) {
                     labelModelList.add(isLabelPresent.get());
-                    isLabelPresent.get().setNoteList(noteServiceModelList);
-                    labelRepository.save(isLabelPresent.get());
+                } else {
+                    throw new UserException(400, "No Label Found With This User Id");
                 }
-            });
-            noteId.stream().forEach(note -> {
-                Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(note);
-                if (isNotePresent.isPresent()) {
+            }
+            Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(noteId);
+            if (isNotePresent.isPresent()) {
+                if (isNotePresent.get().getUserId() == userId) {
                     noteServiceModelList.add(isNotePresent.get());
                     isNotePresent.get().setLabelList(labelModelList);
+                    isLabelPresent.get().setNoteList(noteServiceModelList);
                     noteServiceRepository.save(isNotePresent.get());
+                    labelRepository.save(isLabelPresent.get());
+                    return new Response(200, "Success", isNotePresent.get());
                 }
-            });
-            return new Response(200, "Success", isUserPresent);
-        } else {
-            return new Response(400, "Failed", isUserPresent);
+                throw new UserException(400, "No Note Found With This UserId");
+            }
+            throw new UserException(400, "No Note Found With This Id");
         }
+        throw new UserException(400, "Token is Wrong");
     }
 
     /*
@@ -443,27 +468,27 @@ public class NoteService implements INoteService {
      * @Param : collaborator,noteId,token
      * */
     @Override
-    public Response addCollaborator(String token, Long noteId, List<String> collaborator) {
-        boolean isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Boolean.class);
-        if (isUserPresent) {
+    public Response addCollaborator(String token, Long noteId, String collaborator) {
+        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        if (isUserPresent.getStatusCode() == 200) {
+            Long userId = tokenUtil.decodeToken(token);
             Optional<NoteServiceModel> isNotePresent = noteServiceRepository.findById(noteId);
             if (isNotePresent.isPresent()) {
-                List<String> collaboratorsList = new ArrayList<>();
-                collaborator.stream().forEach(collab -> {
-                    boolean isUser = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/emailValidation/" + collab, Boolean.class);
-                    if (isUser) {
-                        collaboratorsList.add(collab);
+                if (isNotePresent.get().getUserId() == userId) {
+                    List<String> collaboratorsList = new ArrayList<>();
+                    Response isEmailPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/emailValidation/" + collaborator, Response.class);
+                    if (isEmailPresent.getStatusCode() == 200) {
+                        collaboratorsList.add(collaborator);
                     }
-                });
-                isNotePresent.get().setCollaborator(collaboratorsList);
-                noteServiceRepository.save(isNotePresent.get());
-                return new Response(200, "Success", isNotePresent.get());
-            } else {
-                throw new UserException(400, "Note Id Not Found");
+                    isNotePresent.get().setCollaborator(collaboratorsList);
+                    noteServiceRepository.save(isNotePresent.get());
+                    return new Response(200, "Success", isNotePresent.get());
+                }
+                throw new UserException(400, "Note Id Not Found With This UserId");
             }
+            throw new UserException(400, "Note Id Not Found");
         }
         throw new UserException(400, "Token is Wrong");
     }
-
 }
 

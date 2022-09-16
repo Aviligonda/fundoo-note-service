@@ -12,12 +12,14 @@ import java.util.List;
  * @author : Aviligonda Sreenivasulu
  * */
 public interface NoteServiceRepository extends JpaRepository<NoteServiceModel, Long> {
-    @Query(value = "select * from note_service where trash = true ", nativeQuery = true)
-    List<NoteServiceModel> findAllByTrash();
+    @Query(value = "select * from note_service where trash = true and user_id =:userId", nativeQuery = true)
+    List<NoteServiceModel> findAllByTrash(Long userId);
 
-    @Query(value = "select * from note_service where is_archive = true ", nativeQuery = true)
-    List<NoteServiceModel> findAllByArchive();
+    @Query(value = "select * from note_service where is_archive = true and user_id =:userId", nativeQuery = true)
+    List<NoteServiceModel> findAllByArchive(Long userId);
 
-    @Query(value = "select * from note_service where pin = true ", nativeQuery = true)
-    List<NoteServiceModel> findAllByPin();
+    @Query(value = "select * from note_service where pin = true and user_id =:userId", nativeQuery = true)
+    List<NoteServiceModel> findAllByPin(Long userId);
+    @Query(value = "select * from note_service where user_id =:userId  ", nativeQuery = true)
+    List<NoteServiceModel> findAllByUserId(Long userId);
 }

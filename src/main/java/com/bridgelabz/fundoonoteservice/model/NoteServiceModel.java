@@ -31,8 +31,7 @@ public class NoteServiceModel {
     private boolean pin;
     private String color;
     private String email;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date reminderTime;
+    private String reminderTime;
     @ElementCollection(targetClass = String.class)
     private List<String> collaborator;
     private LocalDateTime registerDate;

@@ -10,31 +10,28 @@ import org.springframework.stereotype.Component;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
 public class ShedulingConfig {
-    static Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+    static DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
     @Autowired
     MailService mailService;
     @Autowired
     NoteServiceRepository noteServiceRepository;
 
-    @Scheduled(fixedDelay = 11000)
+    @Scheduled(fixedDelay = 1000)
     public void emailShedulingJob() {
         List<NoteServiceModel> noteList = noteServiceRepository.findAll();
         for (NoteServiceModel noteServiceModel : noteList) {
-            Date remainderDate = noteServiceModel.getReminderTime();
-            String remainderDateFormat = formatter.format(remainderDate);
-            String currentDate = formatter.format(new Date());
-
-            if (remainderDateFormat.equals(currentDate)) {
+            String remainderDate = noteServiceModel.getReminderTime();
+            LocalDateTime currentDate = LocalDateTime.now();
+            if (remainderDate.equals(currentDate.format(format))) {
                 String body = "Note Remainder with id is :" + noteServiceModel.getId();
                 String subject = "Set Remainder Successfully";
                 mailService.send(noteServiceModel.getEmail(), body, subject);
-            } else {
-                throw new UserException(400, "Today Date Not Found");
             }
         }
     }
