@@ -46,6 +46,6 @@ public interface INoteService {
 
     Response addLabels(Long labelId, Long noteId, String token);
 
-    Response addCollaborator(String token, Long noteId, String collaborator);
+    Response addCollaborator(String token, Long noteId, String collaborator, Long collbId);
 
 }

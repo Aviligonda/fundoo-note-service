@@ -36,21 +36,6 @@ public class NoteServiceModel {
     private List<String> collaborator;
     private LocalDateTime registerDate;
     private LocalDateTime updateDate;
-
-//    @ManyToMany
-//    @JoinTable(name = "note_service_label_list",
-//            joinColumns = @JoinColumn(name = "noteId", referencedColumnName = "labelId"))
-//    private List<LabelModel> labelList = new ArrayList<>();
-//
-//    public List<LabelModel> getLabelList() {
-//        return labelList;
-//    }
-//
-//    public void setLabelList(List<LabelModel> labelList) {
-//        this.labelList = labelList;
-//    }
-
-    //        @JsonIgnore
     @ManyToMany(cascade = CascadeType.ALL)
     private List<LabelModel> labelList;
 
@@ -58,7 +43,6 @@ public class NoteServiceModel {
     public NoteServiceModel(NoteServiceDTO noteServiceDTO) {
         this.title = noteServiceDTO.getTitle();
         this.description = noteServiceDTO.getDescription();
-        this.email = noteServiceDTO.getEmail();
     }
 
 

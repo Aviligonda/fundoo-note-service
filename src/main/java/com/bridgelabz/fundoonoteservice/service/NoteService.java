@@ -12,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,19 +44,19 @@ public class NoteService implements INoteService {
     public Response createNote(NoteServiceDTO noteServiceDTO, String token) {
         Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
         if (isUserPresent.getStatusCode() == 200) {
-            Long userId = tokenUtil.decodeToken(token);
-            NoteServiceModel noteServiceModel = new NoteServiceModel(noteServiceDTO);
-            noteServiceModel.setRegisterDate(LocalDateTime.now());
-            noteServiceModel.setUserId(userId);
-            noteServiceModel.setTrash(false);
-            noteServiceModel.setPin(false);
-            noteServiceModel.setArchive(false);
-            noteServiceModel.setColor("White");
-            noteServiceRepository.save(noteServiceModel);
-            return new Response(200, "Success", noteServiceModel);
+                Long userId = tokenUtil.decodeToken(token);
+                NoteServiceModel noteServiceModel = new NoteServiceModel(noteServiceDTO);
+                noteServiceModel.setRegisterDate(LocalDateTime.now());
+                noteServiceModel.setUserId(userId);
+                noteServiceModel.setTrash(false);
+                noteServiceModel.setPin(false);
+                noteServiceModel.setArchive(false);
+                noteServiceModel.setColor("White");
+                noteServiceRepository.save(noteServiceModel);
+                return new Response(200, "Success", noteServiceModel);
+            }
+            throw new UserException(400, "Token Wrong");
         }
-        throw new UserException(400, "Token Wrong");
-    }
 
     /*
      * Purpose : Implement the Logic of Updating Note Details
@@ -75,7 +73,6 @@ public class NoteService implements INoteService {
                 if (isNotePresent.get().getUserId() == userId) {
                     isNotePresent.get().setTitle(noteServiceDTO.getTitle());
                     isNotePresent.get().setDescription(noteServiceDTO.getDescription());
-                    isNotePresent.get().setEmail(noteServiceDTO.getEmail());
                     isNotePresent.get().setUpdateDate(LocalDateTime.now());
                     noteServiceRepository.save(isNotePresent.get());
                     return new Response(200, "Success", isNotePresent.get());
@@ -468,7 +465,7 @@ public class NoteService implements INoteService {
      * @Param : collaborator,noteId,token
      * */
     @Override
-    public Response addCollaborator(String token, Long noteId, String collaborator) {
+    public Response addCollaborator(String token, Long noteId, String collaborator, Long collbId) {
         Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
         if (isUserPresent.getStatusCode() == 200) {
             Long userId = tokenUtil.decodeToken(token);
@@ -476,12 +473,23 @@ public class NoteService implements INoteService {
             if (isNotePresent.isPresent()) {
                 if (isNotePresent.get().getUserId() == userId) {
                     List<String> collaboratorsList = new ArrayList<>();
-                    Response isEmailPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/emailValidation/" + collaborator, Response.class);
-                    if (isEmailPresent.getStatusCode() == 200) {
+                    Response isCollabEmail = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/emailValidation/" + collaborator, Response.class);
+                    if (isCollabEmail.getStatusCode() == 200) {
                         collaboratorsList.add(collaborator);
                     }
+//                    isNotePresent.get().setEmail();
                     isNotePresent.get().setCollaborator(collaboratorsList);
                     noteServiceRepository.save(isNotePresent.get());
+                    List<String> collabList = new ArrayList<>();
+                    collabList.add(isNotePresent.get().getEmail());
+                    NoteServiceModel noteServiceModel = new NoteServiceModel();
+                    noteServiceModel.setUserId(collbId);
+                    noteServiceModel.setTitle(isNotePresent.get().getTitle());
+                    noteServiceModel.setDescription(isNotePresent.get().getDescription());
+                    noteServiceModel.setEmail(collaborator);
+                    noteServiceModel.setCollaborator(collabList);
+                    noteServiceRepository.save(noteServiceModel);
+
                     return new Response(200, "Success", isNotePresent.get());
                 }
                 throw new UserException(400, "Note Id Not Found With This UserId");
@@ -490,5 +498,6 @@ public class NoteService implements INoteService {
         }
         throw new UserException(400, "Token is Wrong");
     }
+
 }
 

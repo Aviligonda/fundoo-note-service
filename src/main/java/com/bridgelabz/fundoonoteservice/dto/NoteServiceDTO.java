@@ -15,8 +15,6 @@ public class NoteServiceDTO {
     private String title;
     @NotNull(message = " description can't be Empty")
     private String description;
-    @NotNull(message = " description can't be Empty")
-    private String email;
 
 
 }
