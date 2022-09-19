@@ -8,6 +8,7 @@ import com.bridgelabz.fundoonoteservice.repository.LabelRepository;
 import com.bridgelabz.fundoonoteservice.repository.NoteServiceRepository;
 import com.bridgelabz.fundoonoteservice.util.Response;
 import com.bridgelabz.fundoonoteservice.util.TokenUtil;
+import com.bridgelabz.fundoonoteservice.util.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -42,7 +43,7 @@ public class NoteService implements INoteService {
      * */
     @Override
     public Response createNote(NoteServiceDTO noteServiceDTO, String token) {
-        Response isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, Response.class);
+        UserResponse isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, UserResponse.class);
         if (isUserPresent.getStatusCode() == 200) {
                 Long userId = tokenUtil.decodeToken(token);
                 NoteServiceModel noteServiceModel = new NoteServiceModel(noteServiceDTO);
@@ -52,6 +53,7 @@ public class NoteService implements INoteService {
                 noteServiceModel.setPin(false);
                 noteServiceModel.setArchive(false);
                 noteServiceModel.setColor("White");
+                noteServiceModel.setEmail(isUserPresent.getObject().getEmailId());
                 noteServiceRepository.save(noteServiceModel);
                 return new Response(200, "Success", noteServiceModel);
             }
