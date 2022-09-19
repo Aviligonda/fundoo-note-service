@@ -45,20 +45,20 @@ public class NoteService implements INoteService {
     public Response createNote(NoteServiceDTO noteServiceDTO, String token) {
         UserResponse isUserPresent = restTemplate.getForObject("http://FUNDOO-USER-SERVICE:8080/userService/validate/" + token, UserResponse.class);
         if (isUserPresent.getStatusCode() == 200) {
-                Long userId = tokenUtil.decodeToken(token);
-                NoteServiceModel noteServiceModel = new NoteServiceModel(noteServiceDTO);
-                noteServiceModel.setRegisterDate(LocalDateTime.now());
-                noteServiceModel.setUserId(userId);
-                noteServiceModel.setTrash(false);
-                noteServiceModel.setPin(false);
-                noteServiceModel.setArchive(false);
-                noteServiceModel.setColor("White");
-                noteServiceModel.setEmail(isUserPresent.getObject().getEmailId());
-                noteServiceRepository.save(noteServiceModel);
-                return new Response(200, "Success", noteServiceModel);
-            }
-            throw new UserException(400, "Token Wrong");
+            Long userId = tokenUtil.decodeToken(token);
+            NoteServiceModel noteServiceModel = new NoteServiceModel(noteServiceDTO);
+            noteServiceModel.setRegisterDate(LocalDateTime.now());
+            noteServiceModel.setUserId(userId);
+            noteServiceModel.setTrash(false);
+            noteServiceModel.setPin(false);
+            noteServiceModel.setArchive(false);
+            noteServiceModel.setColor("White");
+            noteServiceModel.setEmail(isUserPresent.getObject().getEmailId());
+            noteServiceRepository.save(noteServiceModel);
+            return new Response(200, "Success", noteServiceModel);
         }
+        throw new UserException(400, "Token Wrong");
+    }
 
     /*
      * Purpose : Implement the Logic of Updating Note Details
@@ -107,8 +107,8 @@ public class NoteService implements INoteService {
 
     /*
      * Purpose : Implement the Logic of Get Note Details By id
-     * @author : Aviligonda Sreenivasulu
      * @Param :  id
+     * @author : Aviligonda Sreenivasulu
      * */
     @Override
     public Response getNoteById(Long id, String token) {
@@ -300,9 +300,9 @@ public class NoteService implements INoteService {
             if (isNotePresent.isPresent()) {
                 if (isNotePresent.get().getUserId() == userId) {
                     if (!isNotePresent.get().isTrash()) {
-                        isNotePresent.get().setReminderTime(remainder);
-                        noteServiceRepository.save(isNotePresent.get());
-                        return new Response(200, "Success", isNotePresent.get());
+                            isNotePresent.get().setReminderTime(remainder);
+                            noteServiceRepository.save(isNotePresent.get());
+                            return new Response(200, "Success", isNotePresent.get());
                     }
                     throw new UserException(400, " Note found in trash, Not possible to Set Remainder");
                 }
@@ -479,7 +479,6 @@ public class NoteService implements INoteService {
                     if (isCollabEmail.getStatusCode() == 200) {
                         collaboratorsList.add(collaborator);
                     }
-//                    isNotePresent.get().setEmail();
                     isNotePresent.get().setCollaborator(collaboratorsList);
                     noteServiceRepository.save(isNotePresent.get());
                     List<String> collabList = new ArrayList<>();
@@ -490,6 +489,7 @@ public class NoteService implements INoteService {
                     noteServiceModel.setDescription(isNotePresent.get().getDescription());
                     noteServiceModel.setEmail(collaborator);
                     noteServiceModel.setCollaborator(collabList);
+                    noteServiceModel.setRegisterDate(LocalDateTime.now());
                     noteServiceRepository.save(noteServiceModel);
 
                     return new Response(200, "Success", isNotePresent.get());
